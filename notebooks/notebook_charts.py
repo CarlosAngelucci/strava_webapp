@@ -9,10 +9,8 @@ import sys
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 
-from utils import adjust_pace, treat_date, treat_distance_and_time, parse_coordinates, process_strava_data
+from utils import adjust_pace, treat_date, treat_distance_and_time, parse_coordinates, process_strava_data, prepare_df_for_week_analysis
 
-
-# %%
 df = pd.read_csv('../data/activities.csv', index_col=False)
 df = process_strava_data(df)
 df.sort_values(by='start_date', inplace=True, ascending=True)
@@ -202,3 +200,77 @@ showticklabels=False)
 fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(200,200,200,0.2)')
 fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(200,200,200,0.2)')
 # %%
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+df = prepare_df_for_week_analysis(df)
+strava_orange = '#FF9800'
+strava_secondary_green = '#4CAF50'
+strave_green = '#81C784'
+# %%
+fig1 = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.2, subplot_titles=('Distance (km)', 'Pace (min/km)'))
+
+# Distance
+bar_trace = go.Bar(x=df.week_year, y=df['distance_km'], 
+                marker=dict(color='#4CAF50'), 
+                text=df['distance_km'].astype(str) + ' ' + df['week_year'].dt.strftime('%m/%Y'), 
+                textposition='inside',
+                name='',
+                hovertext=df['week_year'].astype(str),
+                hovertemplate='<b>Distance</b>: %{y:.2f} km<br><b>Date</b>: %{hovertext}<extra></extra>')
+
+
+fig1.add_trace(bar_trace, row=1, col=1)
+# Layout e melhorias visuais
+fig1.update_layout(
+    barmode='overlay', 
+    width=1000, 
+    height=500,
+    legend=dict(
+        yanchor="top",
+        y=-0.01,
+        xanchor="center",
+        x=0.5,
+        orientation='h',
+        font=dict(size=18, color='white')
+    ),
+    xaxis_title='', 
+    yaxis=dict(
+        range=[0, max(df['distance_km'])+1], 
+        tickvals=np.arange(0, max(df['distance_km'])+1, 5),
+        title='', 
+        tickfont=dict(color=strava_secondary_green),
+        title_font=dict(color='white', size=20),
+    ),
+    title_text='Distance per Week',
+    title_x=0.5,
+    title_font_family="Roboto",
+    title_font_color="white",
+    title_font_size=20,
+    font_family="Roboto",
+    font_color="white",
+    paper_bgcolor='#1a1a1a',
+    plot_bgcolor='#1a1a1a',
+    hovermode='x unified',
+)
+
+# waterfall chart time spent running
+fig2 = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.2, subplot_titles=('Time (min)'))
+waterfall_chart = go.Waterfall(
+    name = "Time",
+    orientation = "v",
+    measure = df['time_min'],
+    x = df.week_year,
+    textposition = "outside",
+    text = df['time_min'].astype(str) + ' min',
+    hovertext = df.week_year.astype(str),
+    hoverinfo = "x+text+name",
+    connector = {"line":{"color":"rgb(63, 63, 63)"}},
+    decreasing = {"marker":{"color":"#FF9800"}},
+    increasing = {"marker":{"color":"#FF9800"}},
+)
+fig2.add_trace(waterfall_chart, row=1, col=1)
+fig1.show()
+fig2.show()
+
+

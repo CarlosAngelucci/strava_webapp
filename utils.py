@@ -121,3 +121,21 @@ def process_strava_data(df: pd.DataFrame) -> pd.DataFrame:
     df_run['kudos_count'] = df_run['kudos_count'].astype(int)
 
     return df_run
+
+def prepare_df_for_week_analysis(df):
+    df['week_year'] = df['start_date'].dt.strftime('%Y-%U')
+    #  to datetime
+    df['week_year'] = pd.to_datetime(df['week_year'] + '-0', format='%Y-%U-%w')
+    # df['week_number'] = df['start_date'].dt.isocalendar().week
+    # df['year'] = df['start_date'].dt.year
+
+#  groupby year and week number columns sum distance, mean pace and sum time
+    df = df.groupby(['week_year']).agg({'distance_km': 'sum', 'pace': 'mean', 'time_min': 'sum'}).reset_index()
+    df['pace'] = df['pace'].round(2)
+    df['distance_km'] = df['distance_km'].round(2)
+
+# join year and week number columns
+    # df['week'] = df['year'].astype(str) + '-' + df['week_number'].astype(str)
+    # df.drop(columns=['year', 'week_number'], inplace=True)
+    # df.set_index('week', inplace=True)
+    return df
