@@ -69,6 +69,9 @@ def treat_distance_and_time(df: pd.DataFrame) -> pd.DataFrame:
     df['time_min'] = np.round((df['moving_time'] / 60), 2)
     df['rest_during_run_min'] = np.round(((df['elapsed_time'] - df['moving_time']) / 60),2)
 
+    #  delete distances smaller than 1km
+    df = df[df['distance_km'] > 1]
+
     return df
 
 def parse_coordinates(df: pd.DataFrame) -> pd.DataFrame:

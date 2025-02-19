@@ -117,7 +117,7 @@ def distance_pace_chart(df):
     fig.update_xaxes(showgrid=False, showline=True, linewidth=1, linecolor='black', mirror=False, showticklabels=False)
     
     # Grid mais sutil
-    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(200,200,200,0.2)')
+    fig.update_xaxes(showgrid=False, gridwidth=1, gridcolor='rgba(200,200,200,0.2)')
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(200,200,200,0.2)')
     
     return fig
@@ -129,12 +129,12 @@ def week_analysis_chart(df):
 
     bar_trace = go.Bar(x=df.week_year, y=df['distance_km'], 
                 marker=dict(color='#4CAF50'), 
-                text=df['distance_km'].astype(str) + ' ' + df['week_year'].dt.strftime('%m/%Y'), 
-                textposition='inside',
-                textfont=dict(color='white'),
+                text=df['distance_km'].astype(str) + 'km ' + '<br>Week: ' + df['week_year'].dt.strftime('%d/%m/%Y'), 
+                textposition='outside',
+                textfont=dict(color='white', size=18),
                 name='',
                 hovertext=df['week_year'].astype(str),
-                hovertemplate='<b>Distance</b>: %{y:.2f} km<br><b>Date</b>: %{hovertext}<extra></extra>')
+                hovertemplate='<b>Distance</b>: %{y:.2f} km<br><b>Week</b>: %{hovertext}<extra></extra>')
 
 
     fig1.add_trace(bar_trace, row=1, col=1)
@@ -152,8 +152,8 @@ def week_analysis_chart(df):
     ),
     xaxis_title='', 
     yaxis=dict(
-        range=[0, max(df['distance_km'])+1], 
-        tickvals=np.arange(0, max(df['distance_km'])+1, 5),
+        range=[0, max(df['distance_km'])+5], 
+        tickvals=np.arange(0, max(df['distance_km'])+5, 5),
         title='', 
         tickfont=dict(color=strava_secondary_green),
         title_font=dict(color='white', size=20),
@@ -172,12 +172,11 @@ def week_analysis_chart(df):
 
     fig1.update_yaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False)
     fig1.update_xaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False, showticklabels=False)
-# Grid mais sutil
+    # Grid mais sutil
     fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(200,200,200,0.2)')
 
-# waterfall chart time spent running
-
-#  calculando a variação semanal
+    #  ======================== WATERFALL CHART
+    #  calculando a variação semanal
     df['time_diff'] = df['time_min'].diff().fillna(df['time_min'].iloc[0])
 
 #  definindo se a medida é relativa ou total
@@ -214,7 +213,9 @@ def week_analysis_chart(df):
         orientation='h',
         font=dict(size=18, color='white')
     ),
-    xaxis_title='', 
+    xaxis=dict(
+        showticklabels=True,  
+    ), 
     yaxis=dict(
         showticklabels=False,  # Esconde os labels dos ticks
         showgrid=False,        # Esconde a grade
@@ -223,7 +224,7 @@ def week_analysis_chart(df):
         title='',              # Remove o título
         visible=False          # Esconde completamente o eixo Y
     ),
-    title_text='Accumulated Time per Week during Half Marathon Training',
+    title_text='Accumulated Time per Week <br> Half Marathon Training',
     title_x=0.5,
     title_font_family="Roboto",
     title_font_color="white",
@@ -236,7 +237,7 @@ def week_analysis_chart(df):
 )
 
     fig2.update_yaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False)
-    fig2.update_xaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False, showticklabels=False)
+    fig2.update_xaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False, showticklabels=True)
 
     last_week = df['week_year'].iloc[-1]
     fig2.add_annotation(

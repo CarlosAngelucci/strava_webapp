@@ -8,7 +8,7 @@ st.set_page_config(page_title='Half Marathon Training Analysis', layout='wide')
 
 # Sidebar para navegação
 st.sidebar.title("📊 Running Metrics Dashboard")
-page = st.sidebar.radio("Selecione a análise", ["🏃 Distância & Pace", "📆 Resumo Semanal", "📈 Tendências"])
+page = st.sidebar.radio("Selecione a análise", ["🏃 Distance & Pace", "📆 Resumo Semanal", "📈 Tendências"])
 
 # Adicionando a imagem como um header
 st.markdown(
@@ -30,7 +30,7 @@ st.markdown("<h1 style='text-align: center; color: white;'>🏃 Half Marathon Tr
 
 
 # Carregar a página selecionada
-if page == "🏃 Distância & Pace":
+if page == "🏃 Distance & Pace":
     distance_pace.show()
 elif page == "📆 Resumo Semanal":
     resumo_semanal.show()

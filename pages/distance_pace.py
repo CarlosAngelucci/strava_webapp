@@ -18,7 +18,7 @@ def show():
 
     # st.markdown("<h4 style='text-align: center; color: #FC4C02;'>Select the type of run</h4>", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2 = st.columns([1, 2])
     options = ['All', 'Outdoor', 'Indoor']
     with col1:
         st.markdown("""
@@ -41,7 +41,7 @@ def show():
     st.plotly_chart(fig, use_container_width=True, height=2000)
 
     col4, col5, col6 = st.columns([1, 3, 1])
-    with col5:
+    with col2:
         col7, col8, col9 = st.columns(3)
         with col7:
             st.metric(label="🏃‍♂️ Train", value=len(df))

@@ -208,13 +208,14 @@ strava_orange = '#FF9800'
 strava_secondary_green = '#4CAF50'
 strave_green = '#81C784'
 # %%
-fig1 = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.2, subplot_titles=('Distance (km)', 'Pace (min/km)'))
+fig1 = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.2, subplot_titles=('', 'Pace (min/km)'))
 
 # Distance
 bar_trace = go.Bar(x=df.week_year, y=df['distance_km'], 
                 marker=dict(color='#4CAF50'), 
                 text=df['distance_km'].astype(str) + ' ' + df['week_year'].dt.strftime('%m/%Y'), 
                 textposition='inside',
+                textfont=dict(color='white'),
                 name='',
                 hovertext=df['week_year'].astype(str),
                 hovertemplate='<b>Distance</b>: %{y:.2f} km<br><b>Date</b>: %{hovertext}<extra></extra>')
@@ -254,23 +255,96 @@ fig1.update_layout(
     hovermode='x unified',
 )
 
+fig1.update_yaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False)
+fig1.update_xaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False, showticklabels=False)
+# Grid mais sutil
+fig1.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(200,200,200,0.2)')
+
 # waterfall chart time spent running
-fig2 = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.2, subplot_titles=('Time (min)'))
+
+#  calculando a variação semanal
+df['time_diff'] = df['time_min'].diff().fillna(df['time_min'].iloc[0])
+
+#  definindo se a medida é relativa ou total
+df['measure'] = ['relative'] * len(df)
+
+#  ajustando a primeira medida para ser total para começar do zero
+df.loc[0, 'measure'] = 'total'
+
+fig2 = make_subplots(rows=1, cols=1, shared_xaxes=False)
 waterfall_chart = go.Waterfall(
-    name = "Time",
+    name = "Accumulated Time (min)", 
     orientation = "v",
-    measure = df['time_min'],
+    measure = df['measure'],
     x = df.week_year,
+    y = df['time_diff'],
     textposition = "outside",
     text = df['time_min'].astype(str) + ' min',
     hovertext = df.week_year.astype(str),
     hoverinfo = "x+text+name",
     connector = {"line":{"color":"rgb(63, 63, 63)"}},
-    decreasing = {"marker":{"color":"#FF9800"}},
-    increasing = {"marker":{"color":"#FF9800"}},
+    decreasing = {"marker":{"color":"#FB4E05"}},
+    increasing = {"marker":{"color":"#7AAD74"}},
 )
 fig2.add_trace(waterfall_chart, row=1, col=1)
-fig1.show()
+
+fig2.update_layout(
+    width=1000, 
+    height=500,
+    legend=dict(
+        yanchor="top",
+        y=-0.01,
+        xanchor="center",
+        x=0.5,
+        orientation='h',
+        font=dict(size=18, color='white')
+    ),
+    xaxis=dict(
+        showticklabels=True,
+        visible=True
+    ), 
+    yaxis=dict(
+        showticklabels=False,  # Esconde os labels dos ticks
+        showgrid=False,        # Esconde a grade
+        zeroline=False,        # Esconde a linha do zero
+        showline=True,        # Esconde a linha do eixo
+        title='',              # Remove o título
+        visible=False          # Esconde completamente o eixo Y
+    ),
+    title_text='Accumulated Time per Week during Half Marathon Training',
+    title_x=0.5,
+    title_font_family="Roboto",
+    title_font_color="white",
+    title_font_size=20,
+    font_family="Roboto",
+    font_color="white",
+    paper_bgcolor='#1a1a1a',
+    plot_bgcolor='#1a1a1a',
+    hovermode='x unified',
+)
+
+fig2.update_yaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False)
+fig2.update_xaxes(showgrid=False, showline=True, linewidth=1, linecolor='white', mirror=False, showticklabels=True)
+
+last_week = df['week_year'].iloc[-1]
+fig2.add_annotation(
+    x=last_week,
+    y = df['time_min'].iloc[-1]+10,
+    text="Current Week",
+    showarrow=True,
+    arrowhead=2,
+    ax=80,
+    ay=-20,
+    font=dict(size=16, color=strava_secondary_green),
+    bgcolor='#1a1a1a',
+    bordercolor='#1a1a1a',
+    borderwidth=2,
+    opacity=0.8,
+    arrowcolor=strava_secondary_green,
+    arrowwidth=2
+)
+
+# fig1.show()
 fig2.show()
 
 
