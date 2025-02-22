@@ -57,5 +57,5 @@ while True:
 print("Activites imported")
 print(activities)
 
-activities.to_csv('activities.csv')
+activities.to_csv('data/activities.csv')
 

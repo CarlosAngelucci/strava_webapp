@@ -50,4 +50,5 @@ def show():
             st.metric(label="📏 Average Distance", value=f"{df['distance_km'].mean():.2f} km")
 
         with col9:
-            st.metric(label="⏱️ Average Pace", value=f"{df['pace'].mean():.2f} min/km")
+            average_pace = adjust_pace(df['pace'].mean())
+            st.metric(label="📏 Average Distance", value=f"{average_pace} km")
