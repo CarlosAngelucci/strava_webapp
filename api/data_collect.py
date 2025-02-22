@@ -18,13 +18,12 @@ payload = {
 
 print("Requesting Token...\n")
 res = requests.post(auth_url, data=payload, verify=False)
-# access_token = res.json()['access_token']
-# print("Access Token = {}\n".format(access_token))
+access_token = res.json()['access_token']
+print("Access Token = {}\n".format(access_token))
 
 
 # Initialize the dataframe
-# access_token = '1a58132b1ca008187af2ee08c13149af03f040c1'
-access_token = '287673a322e1d8de0550ebc29df135bb716b2f9d'
+# access_token = '287673a322e1d8de0550ebc29df135bb716b2f9d'
 col_names = ['id','type', 'name', 'distance', 'moving_time', 'elapsed_time', 'total_elevation_gain', 'start_date',  'start_latlng', 'end_latlng', 'average_heartrate', 'max_heartrate', 'elev_high', 'elev_low', 'average_speed', 'max_speed', 'kudos_count']
 activities = pd.DataFrame(columns=col_names)
 
