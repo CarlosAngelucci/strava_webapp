@@ -1,5 +1,8 @@
+import os
 import pandas as pd
 import numpy as np
+import requests
+from dotenv import load_dotenv
 
 def adjust_pace(pace: pd.Series) -> pd.Series:
     """
@@ -142,3 +145,64 @@ def prepare_df_for_week_analysis(df):
     # df.drop(columns=['year', 'week_number'], inplace=True)
     # df.set_index('week', inplace=True)
     return df
+
+
+#def get_latest_runs():
+    load_dotenv()
+    client_secret = os.getenv('client_secret')
+    refresh_token = os.getenv('refresh_token')
+    auth_url = "https://www.strava.com/oauth/token"
+    authorization_token = '916939aec74f385d61bff7fd8a04d14db52ec819'
+
+    payload = {
+    'client_id': "148656",
+    'client_secret': client_secret,
+    'refresh_token': refresh_token,
+    'grant_type': "refresh_token",
+    'f': 'json'
+}
+
+    print("Requesting Token...\n")
+    res = requests.post(auth_url, data=payload, verify=False)
+    res_json = res.json()
+    if 'access_token' not in res_json:
+        raise KeyError("Access token not found in the response")
+    access_token = res_json['access_token']
+    # print("Access Token = {}\n".format(access_token))
+
+
+    # Initialize the dataframe
+
+    col_names = ['id','type', 'name', 'distance', 'moving_time', 'elapsed_time', 'total_elevation_gain', 'start_date',  'start_latlng', 'end_latlng', 'average_heartrate', 'max_heartrate', 'elev_high', 'elev_low', 'average_speed', 'max_speed', 'kudos_count']
+    activities = pd.DataFrame(columns=col_names)
+
+    activites_url = "https://www.strava.com/api/v3/athlete/activities"
+    header = {'Authorization': 'Bearer ' + access_token}
+
+    page = 1
+    per_page = 50
+
+    while True:
+    # get page of activities from Strava
+        param = {'per_page': per_page, 'page': page}
+        r = requests.get(activites_url, headers=header, params=param).json()
+
+    # if no results then exit loop
+        if (not r):
+            break
+    
+    # otherwise add new data to dataframe
+        for x in range(len(r)):
+          for c in col_names:
+            try:
+              activities.loc[x + (page-1)*50, c] = r[x][c]
+            except:
+              activities.loc[x + (page-1)*50, c] = 'null'
+
+    # increment page
+        page += 1
+
+    print("Activites imported")
+    print(activities)
+
+    activities.to_csv('data/activities.csv')

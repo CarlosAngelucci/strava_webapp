@@ -5,16 +5,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 
 from utils import adjust_pace, treat_date, treat_distance_and_time, parse_coordinates, process_strava_data, prepare_df_for_week_analysis
 
-df = pd.read_csv('../data/activities.csv', index_col=False)
+df = pd.read_csv('/Users/kaduangelucci/Documents/Projetos/Strava Analysis/data/activities.csv', index_col=False)
 df = process_strava_data(df)
 df.sort_values(by='start_date', inplace=True, ascending=True)
 df.reset_index(drop=True, inplace=True)
+
+# %%
 
 # %%
 #  plot pace distribution
@@ -208,6 +213,7 @@ strava_orange = '#FF9800'
 strava_secondary_green = '#4CAF50'
 strave_green = '#81C784'
 # %%
+
 fig1 = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.2, subplot_titles=('', 'Pace (min/km)'))
 
 # Distance
@@ -348,3 +354,44 @@ fig2.add_annotation(
 fig2.show()
 
 
+# %%
+df_heart = df[['type_run', 'start_date', 'distance_km', 'average_heartrate', 'max_heartrate', 'rest_during_run_min']]
+# %%
+#  ploting with plotly express and go charts to analyze heart rate 
+import plotly.express as px
+import plotly.graph_objs as go
+
+fig = px.line(df_heart, x=df_heart.index, y='average_heartrate',  
+            markers=True, 
+            labels={'average_heartrate': 'Average Heart Rate'}, 
+            hover_data={'start_date': True, 'average_heartrate': ':.2f'})
+
+fig.update_traces(textposition='top center', textfont_size=5, showlegend=True, name='Average Heart Rate',
+                line=dict(color='#FF9800', width=2),
+                marker=dict(size=8, opacity=0.6), 
+                hovertemplate='<b>Average Heart Rate</b>: %{y:.2f} bpm<extra></extra>')
+#  ploting with plotly express and go charts to analyze heart rate
+fig2 = px.line(df_heart, x=df_heart.index, y='max_heartrate',  
+            markers=True, 
+            labels={'max_heartrate': 'Max Heart Rate'}, 
+            hover_data={'start_date': True, 'max_heartrate': ':.2f'})
+
+fig2.update_traces(textposition='top center', textfont_size=5, showlegend=True, name='Max Heart Rate',
+                line=dict(color='#FF9800', width=2),
+                marker=dict(size=8, opacity=0.6), 
+                hovertemplate='<b>Max Heart Rate</b>: %{y:.2f} bpm<extra></extra>')
+# %%
+#  ploting with plotly express and go charts to analyze heart rate
+fig3 = px.line(df_heart, x=df_heart.index, y='rest_during_run_min',  
+            markers=True, 
+            labels={'rest_during_run_min': 'Rest During Run'}, 
+            hover_data={'start_date': True, 'rest_during_run_min': ':.2f'})
+
+fig3.update_traces(textposition='top center', textfont_size=5, showlegend=True, name='Rest During Run',
+                line=dict(color='#FF9800', width=2),
+                marker=dict(size=8, opacity=0.6), 
+                hovertemplate='<b>Rest During Run</b>: %{y:.2f} min<extra></extra>')
+# %%
+fig.show()
+fig2.show()
+fig3.show()

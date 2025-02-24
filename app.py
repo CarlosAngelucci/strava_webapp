@@ -1,14 +1,16 @@
 import streamlit as st
-import pandas as pd
-from charts import distance_pace_chart
-from utils import process_strava_data
-from pages import distance_pace, resumo_semanal
+from pages import distance_pace, resumo_semanal, tendencia
 
 st.set_page_config(page_title='Half Marathon Training Analysis', layout='wide')
 
 # Sidebar para navegação
 st.sidebar.title("📊 Running Metrics Dashboard")
-page = st.sidebar.radio("Selecione a análise", ["🏃 Distance & Pace", "📆 Resumo Semanal", "📈 Tendências"])
+page = st.sidebar.radio("Selecione a análise", ["🏃 Distance & Pace", "📆 Resumo Semanal", "📈 Tendências", "❤️ Heart Frequency Analysis"])
+
+# #  adicionar botao na sidebar para atualizar os dados
+# if st.sidebar.button("Atualizar dados"):
+#     get_latest_runs()
+
 
 # Adicionando a imagem como um header
 st.markdown(
@@ -34,8 +36,11 @@ if page == "🏃 Distance & Pace":
     distance_pace.show()
 elif page == "📆 Resumo Semanal":
     resumo_semanal.show()
-# elif page == "📈 Tendências":
-#     trends.show()
+elif page == "📈 Tendências":
+    tendencia.show()
+    st.markdown("<h3 style='text-align: center; color: white;'>Under Construction</h3>", unsafe_allow_html=True)
+elif page == "❤️ Heart Frequency Analysis":
+    st.markdown("<h3 style='text-align: center; color: white;'>Under Construction</h3>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='text-align: center; color: white;'>Data collected from Strava <img src='https://i.pinimg.com/736x/ed/2a/64/ed2a64f9a34b00ad2013bf23cc0dc162.jpg' alt='Strava' style='vertical-align:middle; height:10'; width:'10';'></h3>", unsafe_allow_html=True)
 

@@ -5,7 +5,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 auth_url = "https://www.strava.com/oauth/token"
 authorization_token = '916939aec74f385d61bff7fd8a04d14db52ec819'
-refresh_token = 'fe2447df89c69bcb0fda2f22f3f4a453e11be078'
+# refresh_token = 'fe2447df89c69bcb0fda2f22f3f4a453e11be078'
 # tutorial video here for info on how: https://www.youtube.com/watch?v=sgscChKfGyg&list=PLO6KswO64zVvcRyk0G0MAzh5oKMLb6rTW
 
 payload = {
