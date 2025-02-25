@@ -38,16 +38,17 @@ def show():
                     pickable = True,
                     extruded = True
                 ),
-                pdk.Layer(
-                    "ScatterplotLayer",
-                    data = data_dict,
-                    get_position = ['end_longitude', 'end_latitude'],
-                    radius = 500,
-                    elevation_scale = 4,
-                    elevation_range = [0, 500],
-                    pickable = True,
-                    extruded = True
-                )
+                # pdk.Layer(
+                #     "ScatterplotLayer",
+                #     data = data_dict,
+                #     get_position = ['end_longitude', 'end_latitude'],
+                #     get_color="[255, 255, 255, 0]",
+                #     radius = 500,
+                #     elevation_scale = 10,
+                #     elevation_range = [0, 500],
+                #     pickable = True,
+                #     extruded = True
+                # )
             ]
         )
         )
