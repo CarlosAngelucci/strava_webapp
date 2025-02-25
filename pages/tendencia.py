@@ -24,7 +24,7 @@ def show():
             initial_view_state=pdk.ViewState(
                 latitude = -20.3478,
                 longitude=-40.2949,
-                zoom=13,
+                zoom=12,
                 pitch=90,
             ),
             layers = [
@@ -37,19 +37,31 @@ def show():
                     elevation_range = [0, 200],
                     pickable = True,
                     extruded = True
-                ),
-                # pdk.Layer(
-                #     "ScatterplotLayer",
-                #     data = data_dict,
-                #     get_position = ['end_longitude', 'end_latitude'],
-                #     get_color="[255, 255, 255, 0]",
-                #     radius = 500,
-                #     elevation_scale = 10,
-                #     elevation_range = [0, 500],
-                #     pickable = True,
-                #     extruded = True
-                # )
+                )
             ]
         )
         )
     
+    GREEN_RGB = [0, 255, 0, 200] #  start point
+    RED_RGB = [240, 100, 0, 200] # end point
+
+    arc_layer = pdk.Layer(
+        "ArcLayer",
+        data=df,
+        get_source_position = ["start_longitude", 'start_latitude'],
+        get_target_position = ['end_longitude','end_latitude'],
+        get_source_color = GREEN_RGB,
+        get_target_color = RED_RGB,
+        get_width = 5,
+        pickable = True,
+        auto_highlight = True,
+    )
+
+    view_state = pdk.ViewState(
+        latitude = -20.3478,
+        longitude=-40.2949,
+        zoom=12,
+        pitch=90,
+    )
+
+    st.pydeck_chart(pdk.Deck(layers=[arc_layer], initial_view_state=view_state))
