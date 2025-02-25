@@ -1,11 +1,11 @@
 import streamlit as st
-from pages import distance_pace, resumo_semanal, tendencia
+from pages import distance_pace, resumo_semanal, rotas
 
 st.set_page_config(page_title='Half Marathon Training Analysis', layout='wide')
 
 # Sidebar para navegação
 st.sidebar.title("📊 Running Metrics Dashboard")
-page = st.sidebar.radio("Selecione a análise", ["🏃 Distance & Pace", "📆 Resumo Semanal", "📈 Tendências", "❤️ Heart Frequency Analysis"])
+page = st.sidebar.radio("Selecione a análise", ["🏃 Distance & Pace", "📆 Resumo Semanal", "🗺️ Rotas", "❤️ Heart Frequency Analysis"])
 
 # #  adicionar botao na sidebar para atualizar os dados
 # if st.sidebar.button("Atualizar dados"):
@@ -36,12 +36,11 @@ if page == "🏃 Distance & Pace":
     distance_pace.show()
 elif page == "📆 Resumo Semanal":
     resumo_semanal.show()
-elif page == "📈 Tendências":
-    tendencia.show()
+elif page == "🗺️ Rotas":
+    rotas.show()
     st.markdown("<h3 style='text-align: center; color: white;'>Under Construction</h3>", unsafe_allow_html=True)
 elif page == "❤️ Heart Frequency Analysis":
     st.markdown("<h3 style='text-align: center; color: white;'>Under Construction</h3>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='text-align: center; color: white;'>Data collected from Strava <img src='https://i.pinimg.com/736x/ed/2a/64/ed2a64f9a34b00ad2013bf23cc0dc162.jpg' alt='Strava' style='vertical-align:middle; height:10'; width:'10';'></h3>", unsafe_allow_html=True)
-
 
