@@ -7,9 +7,14 @@ st.set_page_config(page_title='Half Marathon Training Analysis', layout='wide')
 st.sidebar.title("📊 Running Metrics Dashboard")
 page = st.sidebar.radio("Selecione a análise", ["🏃 Distance & Pace", "📆 Resumo Semanal", "🗺️ Rotas", "❤️ Heart Frequency Analysis"])
 
-# #  adicionar botao na sidebar para atualizar os dados
-# if st.sidebar.button("Atualizar dados"):
-#     get_latest_runs()
+# Ocultar a navegação das páginas do Streamlit na sidebar
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"] {
+            display: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 
 # Adicionando a imagem como um header

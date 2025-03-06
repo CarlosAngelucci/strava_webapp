@@ -19,26 +19,6 @@ def show():
     data_dict = df.to_dict(orient='records')
 
     with st.container():
-        st.markdown("## 📍 Heatmap das Corridas")
-        st.markdown("Este mapa mostra a densidade das corridas realizadas com base nos pontos de início.")
-
-        hex_layer = pdk.Layer("HexagonLayer",
-                data = data_dict,
-                get_position = ['start_longitude', 'start_latitude'],
-                radius = 50,
-                elevation_scale = 4,
-                elevation_range = [0, 200],
-                pickable = True,
-                extruded = True)
-        hex_view_state = pdk.ViewState(
-            latitude = -20.3478,
-            longitude=-40.2949,
-            zoom=12,
-            pitch=90,
-        )
-        st.pydeck_chart(pdk.Deck(layers = [hex_layer], initial_view_state=hex_view_state))
-    
-    with st.container():
         st.markdown("## 🛤️ Conexões Entre Início e Fim das Corridas")
         st.markdown("Este mapa exibe a relação entre os pontos de início e fim das corridas, destacando padrões de deslocamento.")
         
@@ -65,6 +45,28 @@ def show():
         )
 
         st.pydeck_chart(pdk.Deck(layers=[arc_layer], initial_view_state=view_state))
+
+    with st.container():
+        st.markdown("## 📍 Heatmap das Corridas")
+        st.markdown("Este mapa mostra a densidade das corridas realizadas com base nos pontos de início.")
+
+        hex_layer = pdk.Layer("HexagonLayer",
+                data = data_dict,
+                get_position = ['start_longitude', 'start_latitude'],
+                radius = 50,
+                elevation_scale = 4,
+                elevation_range = [0, 200],
+                pickable = True,
+                extruded = True)
+        hex_view_state = pdk.ViewState(
+            latitude = -20.3478,
+            longitude=-40.2949,
+            zoom=12,
+            pitch=90,
+        )
+        st.pydeck_chart(pdk.Deck(layers = [hex_layer], initial_view_state=hex_view_state))
+    
+
 
 
 #  pydeck documentation: https://deckgl.readthedocs.io/en/latest/
