@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import requests
 from dotenv import load_dotenv
+import random
+import polyline
 
 def adjust_pace(pace: pd.Series) -> pd.Series:
     """
@@ -132,77 +134,44 @@ def prepare_df_for_week_analysis(df):
     df['week_year'] = df['start_date'].dt.strftime('%Y-%U')
     #  to datetime
     df['week_year'] = pd.to_datetime(df['week_year'] + '-0', format='%Y-%U-%w')
-    # df['week_number'] = df['start_date'].dt.isocalendar().week
-    # df['year'] = df['start_date'].dt.year
+
 
 #  groupby year and week number columns sum distance, mean pace and sum time
     df = df.groupby(['week_year']).agg({'distance_km': 'sum', 'pace': 'mean', 'time_min': 'sum'}).reset_index()
     df['pace'] = df['pace'].round(2)
     df['distance_km'] = df['distance_km'].round(2)
-
-# join year and week number columns
-    # df['week'] = df['year'].astype(str) + '-' + df['week_number'].astype(str)
-    # df.drop(columns=['year', 'week_number'], inplace=True)
-    # df.set_index('week', inplace=True)
     return df
 
 
-#def get_latest_runs():
-    load_dotenv()
-    client_secret = os.getenv('client_secret')
-    refresh_token = os.getenv('refresh_token')
-    auth_url = "https://www.strava.com/oauth/token"
-    authorization_token = '916939aec74f385d61bff7fd8a04d14db52ec819'
+#  =========== ROUTE FUNCTIONS ===========
+def decode_polyline(df):
+    df['map_polyline'] = df['map_polyline'].apply(lambda x: polyline.decode(x) if isinstance(x, str) else None)
+    df['map_summary_polyline'] = df['map_summary_polyline'].apply(lambda x: polyline.decode(x) if isinstance(x, str) else None)
 
-    payload = {
-    'client_id': "148656",
-    'client_secret': client_secret,
-    'refresh_token': refresh_token,
-    'grant_type': "refresh_token",
-    'f': 'json'
-}
+    df['map_polyline'] = df['map_polyline'].apply(lambda x: [list(i) for i in x] if isinstance(x, list) else None)
+    df['map_summary_polyline'] = df['map_summary_polyline'].apply(lambda x: [list(i) for i in x] if isinstance(x, list) else None)
 
-    print("Requesting Token...\n")
-    res = requests.post(auth_url, data=payload, verify=False)
-    res_json = res.json()
-    if 'access_token' not in res_json:
-        raise KeyError("Access token not found in the response")
-    access_token = res_json['access_token']
-    # print("Access Token = {}\n".format(access_token))
+    return df
 
+def random_rgb():
+    return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
-    # Initialize the dataframe
-
-    col_names = ['id','type', 'name', 'distance', 'moving_time', 'elapsed_time', 'total_elevation_gain', 'start_date',  'start_latlng', 'end_latlng', 'average_heartrate', 'max_heartrate', 'elev_high', 'elev_low', 'average_speed', 'max_speed', 'kudos_count']
-    activities = pd.DataFrame(columns=col_names)
-
-    activites_url = "https://www.strava.com/api/v3/athlete/activities"
-    header = {'Authorization': 'Bearer ' + access_token}
-
-    page = 1
-    per_page = 50
-
-    while True:
-    # get page of activities from Strava
-        param = {'per_page': per_page, 'page': page}
-        r = requests.get(activites_url, headers=header, params=param).json()
-
-    # if no results then exit loop
-        if (not r):
-            break
+def prepare_geojson(df):
+    geojson = pd.DataFrame({
+    "date": df["start_date"],  # Data da atividade
+    "name": [f"Rota {i+1}" for i in range(len(df))],  # Nome da atividade
+    "color": "#ed1c24",  # Cor fixa, pode personalizar
+    "path": df["map_polyline"]  # Lista de listas de coordenadas
+})
     
-    # otherwise add new data to dataframe
-        for x in range(len(r)):
-          for c in col_names:
-            try:
-              activities.loc[x + (page-1)*50, c] = r[x][c]
-            except:
-              activities.loc[x + (page-1)*50, c] = 'null'
+    geojson["color"] = geojson["color"].apply(lambda x: random_rgb())
 
-    # increment page
-        page += 1
+    geojson = geojson[geojson['path'].notnull()]
+    def swap_coords(coord_list):
+        return [[i[1], i[0]] for i in coord_list]
+    
+    geojson['path'] = geojson['path'].apply(swap_coords)
+    geojson.reset_index(drop=True, inplace=True)
+    return geojson
 
-    print("Activites imported")
-    print(activities)
-
-    activities.to_csv('data/activities.csv')
+#  =========== END ROUTE FUNCTIONS ===========
