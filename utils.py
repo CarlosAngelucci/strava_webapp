@@ -144,6 +144,10 @@ def prepare_df_for_week_analysis(df):
 
 
 #  =========== ROUTE FUNCTIONS ===========
+def get_individual_activities():
+    df = pd.read_csv('/Users/kaduangelucci/Documents/Projetos/Strava Analysis/data/individual_activity.csv')
+    return df
+
 def decode_polyline(df):
     df['map_polyline'] = df['map_polyline'].apply(lambda x: polyline.decode(x) if isinstance(x, str) else None)
     df['map_summary_polyline'] = df['map_summary_polyline'].apply(lambda x: polyline.decode(x) if isinstance(x, str) else None)
@@ -157,6 +161,7 @@ def random_rgb():
     return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
 def prepare_geojson(df):
+    decode_polyline(df)
     geojson = pd.DataFrame({
     "date": df["start_date"],  # Data da atividade
     "name": [f"Rota {i+1}" for i in range(len(df))],  # Nome da atividade
@@ -174,4 +179,14 @@ def prepare_geojson(df):
     geojson.reset_index(drop=True, inplace=True)
     return geojson
 
+def to_float(df):
+    df['distance_km'] = df['distance_km'].astype(float)
+    df['time_min'] = df['time_min'].astype(float)
+    df['pace'] = df['pace'].replace(':', '.', regex=True).astype(float)
+    df['average_heartrate'] = df['average_heartrate'].astype(float)
+    df['max_heartrate'] = df['max_heartrate'].astype(float)
+    df['rest_during_run_min'] = df['rest_during_run_min'].astype(float)
+    df['kudos_count'] = df['kudos_count'].astype(int)
+
+    return df
 #  =========== END ROUTE FUNCTIONS ===========

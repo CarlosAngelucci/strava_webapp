@@ -1,72 +1,59 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-import sys
-import os
-from utils import process_strava_data, prepare_df_for_week_analysis
+from utils import  prepare_geojson, get_individual_activities, treat_distance_and_time, adjust_pace, parse_coordinates, treat_date, to_float
 import pydeck as pdk
-
+import numpy as np
 
 def show():
-    df = pd.read_csv("data/activities.csv")
-    df = process_strava_data(df)
-    df['start_latitude'] = df['start_latitude'].astype(float)
-    df['start_longitude'] = df['start_longitude'].astype(float)
-    df['end_latitude'] = df['end_latitude'].astype(float)
-    df['end_longitude'] = df['end_longitude'].astype(float)
-    df = df[df['type_run'] == 'Outdoor']
-    df = df[['start_latitude', 'start_longitude', 'end_latitude', 'end_longitude']]
-    data_dict = df.to_dict(orient='records')
+    df = get_individual_activities()
+    df = treat_distance_and_time(df)
+    df['pace'] = np.round((df['time_min'] / df['distance_km']),2)
+    df['pace_adjusted'] = df.pace.apply(adjust_pace)
+    df.drop(columns=['pace'], inplace=True)
+    df.rename(columns={'pace_adjusted': 'pace'}, inplace=True)
+
+    df = parse_coordinates(df)
+    df = treat_date(df)
+    df = to_float(df)
+
+    geojson = prepare_geojson(df)
 
     with st.container():
-        st.markdown("## 🛤️ Conexões Entre Início e Fim das Corridas")
-        st.markdown("Este mapa exibe a relação entre os pontos de início e fim das corridas, destacando padrões de deslocamento.")
-        
-        GREEN_RGB = [0, 255, 0, 200] #  start point
-        RED_RGB = [240, 100, 0, 200] # end point
+        st.markdown("## 🏃‍♂️ Individual Activities")
+        st.markdown("This map shows the path of each individual activity.")
 
-        arc_layer = pdk.Layer(
-            "ArcLayer",
-            data=df,
-            get_source_position = ["start_longitude", 'start_latitude'],
-            get_target_position = ['end_longitude','end_latitude'],
-            get_source_color = GREEN_RGB,
-            get_target_color = RED_RGB,
-            get_width = 5,
-            pickable = True,
-            auto_highlight = True,
-        )
+        #  filtro de data
+        unique_dates = geojson['date'].dt.date.unique()
+        selected_date = st.date_input("Select a date (optional)", value=None, min_value=min(unique_dates), max_value=max(unique_dates))
+
+        #  filtrando o geojson pela data selecionada
+        if selected_date:
+            geojson_filtered = geojson[geojson['date'].dt.date == selected_date]
+        else:
+            geojson_filtered = geojson
+        
+        if len(geojson.path) > 0:
+            init_lon, init_lat = geojson.path[0][0]
+        else:
+            init_lon, init_lat = -40.0, -20.0
 
         view_state = pdk.ViewState(
-            latitude = -20.3478,
-            longitude=-40.2949,
-            zoom=12,
-            pitch=90,
+            latitude = init_lat,
+            longitude=init_lon,
+            zoom=5,
+            pitch=10,
         )
 
-        st.pydeck_chart(pdk.Deck(layers=[arc_layer], initial_view_state=view_state))
-
-    with st.container():
-        st.markdown("## 📍 Heatmap das Corridas")
-        st.markdown("Este mapa mostra a densidade das corridas realizadas com base nos pontos de início.")
-
-        hex_layer = pdk.Layer("HexagonLayer",
-                data = data_dict,
-                get_position = ['start_longitude', 'start_latitude'],
-                radius = 50,
-                elevation_scale = 4,
-                elevation_range = [0, 200],
-                pickable = True,
-                extruded = True)
-        hex_view_state = pdk.ViewState(
-            latitude = -20.3478,
-            longitude=-40.2949,
-            zoom=12,
-            pitch=90,
+        path_layer = pdk.Layer(
+            "PathLayer",
+            data=geojson_filtered,
+            get_path='path',
+            get_color='color',
+            get_width=15,
+            width_min_pixels=2,
+            auto_highlight=True,
+            highlight_color=[255, 255, 0, 200],
         )
-        st.pydeck_chart(pdk.Deck(layers = [hex_layer], initial_view_state=hex_view_state))
-    
 
-
-
-#  pydeck documentation: https://deckgl.readthedocs.io/en/latest/
+        st.pydeck_chart(pdk.Deck(layers=[path_layer], initial_view_state=view_state))
